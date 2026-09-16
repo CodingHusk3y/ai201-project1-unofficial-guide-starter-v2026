@@ -29,7 +29,7 @@ Hieu Cao - campus_life
 
 ## Chunking Strategy
 
-**Chunk size:** `CHUNK_SIZE = 600` — a soft cap on *body* characters per
+**Chunk size:** `CHUNK_SIZE = 610` — a soft cap on *body* characters per
 chunk (the title line is not counted). Paragraphs are grouped until the next
 one would push the body past 600. Cuts happen only at paragraph breaks.
 **Overlap:** `CHUNK_OVERLAP = 0`. Instead of overlapping characters, the
