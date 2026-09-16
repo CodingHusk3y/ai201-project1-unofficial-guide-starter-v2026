@@ -34,7 +34,7 @@ all 7 `housing_*.txt` files share the same "what it's actually like" template.
 The only thing that distinguishes Morrow House's post is the building name and
 the price, so with 14 look-alikes and only 5 slots I expect that one to be the
 miss. I'm not saying 3 of 5 because a system that only handles the easy four
-would pass 3 of 5 without the hard question ever being tested.
+would pass 3 of 5 without the hard question ever being tested, and that's clearly not good.
 
 ---
 
