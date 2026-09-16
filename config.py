@@ -24,11 +24,29 @@ CORPUS = os.getenv("AI201_CORPUS", "campus_life")
 
 
 # ─── Chunking (Milestone 3) ──────────────────────────────────────────────────
-# These are deliberately plain, generic numbers. Milestone 3 is where you
-# replace them with numbers that fit the documents you actually read.
+# Set for `campus_life` after reading all 88 posts. Every post is a title line
+# plus one to four short paragraphs, 178 to 549 characters in total, and the
+# authors already split each subject into topical posts (laundry, noise,
+# exams, workload, follow-ups). See README.md → Chunking Strategy.
+#
+# `split_documents` cuts on paragraph breaks only, never mid-sentence, and
+# repeats the title line on every chunk it makes from a document.
 
-CHUNK_SIZE = 800        # characters per chunk
-CHUNK_OVERLAP = 120     # characters shared between neighbouring chunks
+CHUNK_SIZE = 600        # soft cap on BODY characters per chunk (title excluded).
+                        # Paragraphs are grouped until the next one would push
+                        # the body past this. No campus_life post reaches it
+                        # (longest body is 502), so today one post = one chunk;
+                        # it exists so a longer post is split at a paragraph
+                        # break instead of mid-sentence.
+CHUNK_OVERLAP = 0       # character overlap exists to repair sentences cut in
+                        # half; paragraph cuts never do that, and copying text
+                        # between neighbours would make the look-alike posts
+                        # in this corpus even more alike. The repeated title
+                        # line is the shared context instead.
+MIN_CHUNK = 80          # a leftover group with a body shorter than this is
+                        # folded into the previous chunk rather than standing
+                        # alone as a fragment (the starter made a 2-character
+                        # chunk on advice_threads this way).
 
 
 # ─── Retrieval (Milestone 4) ─────────────────────────────────────────────────

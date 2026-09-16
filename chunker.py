@@ -80,24 +80,114 @@ def fallback_split(
     return chunks
 
 
-def split_documents(documents: list[Document]) -> list[Chunk]:
+def _paragraphs(text: str) -> list[str]:
+    """Non-empty paragraphs, in order. `ingest.clean_text` has already
+    collapsed runs of blank lines to one, so a blank line is the boundary."""
+    return [p.strip() for p in text.split("\n\n") if p.strip()]
+
+
+def _is_heading(paragraph: str) -> bool:
+    """A section label rather than content: a Markdown heading, or a short
+    line with no sentence-ending punctuation ("Getting around"). campus_life
+    has none of these in post bodies; city_guides is made of them."""
+    if paragraph.startswith("#"):
+        return True
+    return len(paragraph) < 60 and "\n" not in paragraph and paragraph[-1] not in ".!?)"
+
+
+def _attach_headings(paragraphs: list[str]) -> list[str]:
+    """Glue each heading to the paragraph after it, so a heading can never be
+    the last thing in one chunk while its content is the first thing in the
+    next. A heading with nothing after it stays as it is."""
+    merged: list[str] = []
+    pending: list[str] = []
+    for paragraph in paragraphs:
+        if _is_heading(paragraph):
+            pending.append(paragraph)
+            continue
+        merged.append("\n\n".join(pending + [paragraph]))
+        pending = []
+    if pending:
+        merged.append("\n\n".join(pending))
+    return merged
+
+
+def split_documents(
+    documents: list[Document],
+    chunk_size: int | None = None,
+    min_chunk: int | None = None,
+) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Paragraph-aware chunking that keeps the document's name on every chunk.
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    Written for `campus_life`, where every post is one title line ("Morrow
+    House — what it's actually like", "CS 340 Databases") followed by one to
+    four short paragraphs. The name is on the title line and the useful figure
+    is in a body sentence, and 62 of the 88 posts are templated look-alikes
+    that differ only by that name and that figure. So the rules are:
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
+      1. Cut only on paragraph breaks. A sentence is never split in half.
+      2. The first paragraph is the title. It is prefixed to every chunk made
+         from the document, so a chunk that says "$1.50 wash, $1.25 dry" also
+         says which building.
+      3. Body paragraphs are grouped in order until adding the next one would
+         push the group's body past `chunk_size`. A single paragraph longer
+         than the cap stays whole rather than being cut.
+      4. A trailing group whose body is shorter than `min_chunk` is folded into
+         the previous chunk instead of becoming a fragment.
+      5. A section heading ("## Getting around") travels with the paragraph
+         under it, so it can't end one chunk while its content starts the next.
+         campus_life posts have no headings in their bodies; this is for the
+         sectioned corpora.
 
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    With the campus_life numbers in config.py no post reaches the cap, so the
+    output is one chunk per post — the same count as the starter, but arrived
+    at by a rule that still holds if a longer post is added. On `city_guides`
+    the same function splits each guide at its section breaks.
     """
-    return fallback_split(documents)
+    chunk_size = chunk_size or config.CHUNK_SIZE
+    min_chunk = config.MIN_CHUNK if min_chunk is None else min_chunk
+
+    chunks: list[Chunk] = []
+    for doc in documents:
+        paragraphs = _paragraphs(doc.text)
+        if not paragraphs:
+            continue
+
+        title, body = paragraphs[0], _attach_headings(paragraphs[1:])
+        if not body:
+            # A one-paragraph document: the "title" is the whole content.
+            groups: list[list[str]] = [[title]]
+            title = ""
+        else:
+            groups = []
+            current: list[str] = []
+            current_len = 0
+            for paragraph in body:
+                if current and current_len + len(paragraph) > chunk_size:
+                    groups.append(current)
+                    current, current_len = [], 0
+                current.append(paragraph)
+                current_len += len(paragraph)
+            if current:
+                groups.append(current)
+
+            # Rule 4: don't leave a fragment at the end.
+            if len(groups) > 1 and sum(len(p) for p in groups[-1]) < min_chunk:
+                groups[-2].extend(groups.pop())
+
+        for index, group in enumerate(groups):
+            text = "\n\n".join(([title] if title else []) + group)
+            chunks.append(
+                Chunk(
+                    text=text,
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
