@@ -51,7 +51,10 @@ MIN_CHUNK = 80          # a leftover group with a body shorter than this is
 
 # ─── Retrieval (Milestone 4) ─────────────────────────────────────────────────
 
-TOP_K = 5               # how many chunks to pull back per question
+TOP_K = 4               # how many chunks to pull back per question.
+                        # Chosen after retrieval checks: 4 kept the best chunk
+                        # for every in-scope test question while trimming one
+                        # lower-ranked distractor from the prompt context.
 
 # The relevance gate. If the best chunk is further away than this, the system
 # refuses to answer instead of handing the model thin material.

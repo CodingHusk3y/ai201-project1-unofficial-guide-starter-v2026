@@ -165,11 +165,14 @@ Laundry costs $1.75 wash, $1.75 dry, app-based. On noise: moderate; the building
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** How much does laundry cost in Morrow House?
 
 **Answer:**
 
 ```
+Laundry in Morrow House costs $1.50 for a wash and $1.25 for a dry, and can be paid with coin or card.
+
+Source: housing_morrow_house.txt
 ```
 
 **My relevance cutoff:**
@@ -183,9 +186,27 @@ Laundry costs $1.75 wash, $1.75 dry, app-based. On noise: moderate; the building
 
      Milestone 4. -->
 
+I kept `THRESHOLD = 0.6` and set `TOP_K = 4`.
+
+How I got there:
+- In-scope best distances (5 questions): `0.1729, 0.1998, 0.2058, 0.2761, 0.3056`
+- Out-of-scope best distances (5 questions): `0.8246, 0.8442, 0.8859, 0.8960, 0.9340`
+- The gap is wide: `0.3056` to `0.8246`.
+
+Any cutoff in that gap works. I kept `0.6` because it safely accepts all in-corpus test questions and refuses all out-of-scope ones, with margin on both sides.
+
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| What are the wait times at Kestrel Commons during lunch? | yes | 0.1729 |
+| How much does laundry cost in Morrow House? | yes | 0.1998 |
+| How late in the semester can I declare a course pass/fail? | yes | 0.2058 |
+| How does the workload for CS 340 Databases change over the term? | yes | 0.2761 |
+| What is the deadline to withdraw from a course, and how is it different from dropping? | yes | 0.3056 |
+| What is the capital of Mongolia? | no | 0.8246 |
+| How do I change the oil in a diesel engine? | no | 0.9340 |
+| Who won the 1994 World Cup? | no | 0.8859 |
+| What is the recommended dosage of ibuprofen for a headache? | no | 0.8442 |
+| How do I write a for loop in Rust? | no | 0.8960 |
 
 ## How I Used AI
 
