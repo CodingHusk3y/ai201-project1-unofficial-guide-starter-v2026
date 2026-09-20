@@ -21,11 +21,7 @@ Hieu Cao - campus_life
 
 ## What This Does
 
-<!-- Three or four sentences. Which corpus you picked, and the kinds of
-     questions your system answers. Write it for someone who has never seen
-     this repo.
-
-     Milestone 5. -->
+I picked the "campus_life" corpus. It answer the general questions that a student might need the answer.
 
 ## Chunking Strategy
 
@@ -210,14 +206,9 @@ Any cutoff in that gap works. I kept `0.6` because it safely accepts all in-corp
 
 ## How I Used AI
 
-<!-- Two specific moments. For each: what you asked for, what came back, and
-     what you changed about it.
+I used AI to help me analyze the errors. Based on the feed back, I changed the code, or the commands.
 
-     "I asked Claude to write the chunking function from my notes. It ignored
-     the overlap, so I added that myself" is the level of detail we're after.
-     "I used AI to help me code" is not.
-
-     Milestone 5. -->
+I also used AI to suggest a good chunking size, test each of them to see which one gave the result that I want.
 
 **1.**
 
