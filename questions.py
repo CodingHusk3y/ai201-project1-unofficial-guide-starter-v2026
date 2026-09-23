@@ -33,7 +33,7 @@ QUESTIONS = [
     #    and no other post mentions "20 to 25 minutes".
     {
         "question": "What are the wait times at Kestrel Commons during lunch?",
-        "expects": "20 to 30 minutes",
+        "expects": "20 to 25 minutes",
     },
 
     # 2. Housing / laundry. The hard one: 7 laundry posts and 7 housing posts
