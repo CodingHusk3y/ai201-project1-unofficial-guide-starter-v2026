@@ -36,6 +36,20 @@ the price, so with 14 look-alikes and only 5 slots I expect that one to be the
 miss. I'm not saying 3 of 5 because a system that only handles the easy four
 would pass 3 of 5 without the hard question ever being tested, and that's clearly not good.
 
+> **Corrected in unit 2:** this rationale says `TOP_K = 5`. The measured value
+> from Milestone 4 is `TOP_K = 4` (`config.py`), so "only 5 slots" above should
+> read "only 4 slots". The target — 4 of my 5 questions — is unchanged, and the
+> argument for it is unaffected: fewer slots makes the Morrow House question
+> harder, not easier.
+>
+> **Why not just change TOP_K to 5:** I checked at `top_k=8` before deciding.
+> The answer-bearing chunk is at rank 1 for all five questions, so a fifth slot
+> retrieves nothing new. What it does add is one more near-duplicate — for the
+> Morrow House question, slot 5 is `housing_aldridge_hall_laundry.txt`, a third
+> wrong building's laundry price in the prompt context. That is exactly the
+> failure criterion 5 exists to catch, so raising TOP_K would have traded a
+> real risk for no retrieval gain.
+
 ---
 
 ## 2. Every answer names a source

@@ -239,17 +239,104 @@ I also used AI to suggest a good chunking size, test each of them to see which o
 
      Milestone 1. -->
 
+Source: `results/run_2026-09-23_2326_before.md`, produced by
+`run_eval.py::main`. Corpus `campus_life`, `TOP_K = 4`, `THRESHOLD = 0.6`,
+3 runs per question, caching off. 15 model calls, 8,935 tokens.
+
 | Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
 |---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| 1. Retrieved chunk contains the answer | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 2. Every answer names a source | 5 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 3. Gate stops out-of-corpus questions | 4 of 5 | 5 of 5 | 5 of 5 | 5 of 5 | MET |
+| 4. Name kept with the number | 10 of 10, none under 150 | 10 of 10, min 178 | 10 of 10, min 178 | 10 of 10, min 178 | MET |
+| 5. No answer cites the wrong source | 0 wrong of 5 | 0 wrong | 0 wrong | 0 wrong | MET |
 
-<!-- Underneath, paste the REAL output for each criterion from one of your
-     runs — the actual text your system produced, not a description of it.
-     Name the file and function that produced it. -->
+Criteria 1, 3 and 4 are measured once rather than three times. Retrieval is
+deterministic, the gate is a comparison against a fixed number, and chunking
+does not vary between runs, so the same figure goes in all three columns. Only
+criteria 2 and 5 depend on generation, which does vary — the three runs below
+are three different sentences.
+
+### Criterion 1 — real output
+
+Retrieved sources per question, from `store.py::search` at `TOP_K = 4`. The
+file containing the `expects` phrase is **bold**; it came back at rank 1 every
+time.
+
+| Question | `expects` | Retrieved (rank order) | Best distance |
+|---|---|---|---|
+| Kestrel Commons wait times | `20 to 25 minutes` | **dining_kestrel_commons_followup.txt**, **dining_kestrel_commons.txt**, dining_the_ridgeway_cafe_followup.txt, dining_halden_hall_followup.txt | 0.1729 |
+| Morrow House laundry | `$1.25` | **housing_morrow_house_laundry.txt**, **housing_morrow_house.txt**, housing_old_brewhouse_laundry.txt, housing_innisfree_hall_laundry.txt | 0.1998 |
+| Pass/fail deadline | `week eight` | **admin_pass_fail_option.txt**, admin_declaring_a_major.txt, admin_add_drop_deadline.txt, admin_graduation_requirements.txt | 0.2058 |
+| CS 340 workload | `last three weeks` | **course_cs_340_workload.txt**, course_cs_210_workload.txt, course_cs_340_exams.txt, **course_cs_340.txt** | 0.2761 |
+| Withdrawal deadline | `week ten` | **admin_withdrawal_deadline.txt**, admin_add_drop_deadline.txt, admin_grade_appeals.txt, admin_pass_fail_option.txt | 0.3056 |
+
+### Criteria 2 and 5 — real output
+
+Three runs of the question I predicted would be the miss, copied from the run
+log. Each names a source, and each names a Morrow House file:
+
+```
+run 1:  In Morrow House, laundry costs $1.50 for a wash and $1.25 for a dry,
+        and can be paid with coin or card.
+
+        Source: housing_morrow_house_laundry.txt
+
+run 2:  Laundry in Morrow House costs $1.50 for a wash and $1.25 for a dryer.
+
+        Source: housing_morrow_house.txt
+
+run 3:  Laundry in Morrow House costs $1.50 for a wash and $1.25 for a dry,
+        and can be paid with coin or card.
+
+        Source: housing_morrow_house.txt
+```
+
+Both cited files contain `$1.25`. No run cited Old Brewhouse or Innisfree Hall,
+the two other buildings' laundry posts that were in the prompt context.
+
+### Criterion 3 — real output
+
+From `run_eval.py::check_out_of_scope`, cutoff 0.6. Refused 5 of 5:
+
+| Out-of-scope question | Best distance | Gate |
+|---|---|---|
+| What is the capital of Mongolia? | 0.825 | refused |
+| How do I change the oil in a diesel engine? | 0.934 | refused |
+| Who won the 1994 World Cup? | 0.886 | refused |
+| What is the recommended dosage of ibuprofen for a headache? | 0.844 | refused |
+| How do I write a for loop in Rust? | 0.896 | refused |
+
+### Criterion 4 — real output
+
+From `python app.py chunks -n 10`, chunks by `chunker.py::split_documents`.
+All 10 carry a figure, and all 10 carry the name it belongs to on the title
+line. Two of the ten:
+
+```
+Workload for PHYS 130 Mechanics            <- source: course_phys_130_workload.txt#0
+
+People keep asking so: 7 hours a week, plus 3 on lab weeks. That's real time,
+not optimistic time.
+
+It's front-loaded — the first month is heavier than the rest, partly because
+you're learning the format.
+```
+
+```
+Laundry in Morrow House                    <- source: housing_morrow_house_laundry.txt#0
+
+Machines take $1.50 wash, $1.25 dry, coin or card. There are eight washers and
+six dryers for the building, which is the wrong ratio and means the dryers back
+up on Sunday evenings.
+
+Best time to do laundry here is Tuesday or Wednesday morning. Sunday after 6pm
+you will wait.
+```
+
+Index-wide figures from `chunker.py::describe`: `88 chunks, 317 characters on
+average (shortest 178, longest 549)`. The 150-character floor holds with 28
+characters to spare.
 
 ## Verdicts
 
@@ -264,11 +351,18 @@ I also used AI to suggest a good chunking size, test each of them to see which o
 
 | # | Criterion | Verdict | How I decided |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+| 1 | Retrieved chunks contain the answer, 4 of 5 | **MET** | 5 of 5, and not narrowly: the file holding the `expects` phrase was at rank 1 for all five questions, with 0.16 to 0.27 of distance between it and the nearest wrong file. I checked rank rather than mere presence because at `TOP_K = 4` a chunk at rank 4 would still count as a pass while being one slot from falling out. |
+| 2 | Every answer names a source, 15 of 15 | **MET** | Every one of the 15 answers ended with a `Source:` line naming a real file. No gate refusal on an in-corpus question, which was the other way this could have failed. |
+| 3 | Gate stops out-of-corpus questions, 4 of 5 | **MET** | 5 of 5 refused. The two I flagged as borderline in unit 1 were not close: ibuprofen came back at 0.844 and the Rust question at 0.896, against a 0.6 cutoff. My worry that "health" would collide with `health_center.txt` was wrong — the embedding separates a topic from a building's opening hours more cleanly than I expected. |
+| 4 | Name kept with the number, 10 of 10 and no chunk under 150 chars | **MET** | Read all ten chunks in the sample. Every one contains at least one figure and every one carries the name on its title line, because `split_documents` prefixes the title to every chunk it makes. Shortest chunk in the whole index is 178 characters. |
+| 5 | No answer cites the wrong building, hall or course, 0 of 15 | **MET** | Opened each of the 15 cited files and searched for that question's `expects` phrase. All 15 contained it. The Morrow House question is the one that mattered: its prompt context included Old Brewhouse and Innisfree Hall laundry posts, and no run cited either. |
+
+**One correction to disclose.** Question 1's `expects` read `20 to 30 minutes`,
+a figure that appears nowhere in `campus_life`; the corpus says `20 to 25
+minutes`, which is also what the comment above that line said all along. It was
+a transcription slip, caught before this eval ran and fixed in `questions.py`.
+The target did not change — only the string I measure it with. Had it gone
+uncaught, criteria 1 and 5 would both have scored a false miss on question 1.
 
 ## Diagnoses
 
