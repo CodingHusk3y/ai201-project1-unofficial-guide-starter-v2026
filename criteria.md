@@ -149,6 +149,22 @@ never sees a chunk without its filename attached, so a wrong citation means it
 either mixed up two excerpts or answered from a chunk that didn't contain the
 answer, and both are things I want to find out about.
 
+> **Revised in unit 2:** Across all 15 answers, zero answers name a source file
+> that is about a different building, dining hall, or course than the question
+> asks about. An answer may cite more than one file; each cited file has to
+> have supplied something the answer says.
+>
+> **Why revised:** the original measures the wrong thing. It assumes one answer
+> cites one file. Question 5 deliberately asks something that takes two — the
+> withdrawal deadline from `admin_withdrawal_deadline.txt` and the contrast
+> with dropping from `admin_add_drop_deadline.txt` — and when the after-run did
+> exactly that, correctly, the original wording scored it as a wrong citation,
+> because the second file doesn't contain the first file's `expects` phrase.
+> The revision keeps the failure I care about (Calder Annexe's laundry price
+> presented as Morrow House's) and stops punishing the behaviour I want. The
+> target stays at zero, and the MISSED verdict in the after-run stands as
+> recorded.
+
 ---
 
 <!-- ─────────────────────────────────────────────────────────────────────────

@@ -64,7 +64,23 @@ TOP_K = 4               # how many chunks to pull back per question.
 # 0.6 is a reasonable starting point, not a right answer. Milestone 4 has you
 # measure your own two groups of distances and put the cutoff in the gap.
 # Most corpora land somewhere between 0.45 and 0.75.
-THRESHOLD = 0.6
+#
+# Unit 2: retuned 0.6 -> 0.37. The 0.6 was measured in Milestone 4 against
+# out-of-scope questions about Mongolia and diesel engines, which came back at
+# 0.825 to 0.934. Any cutoff between 0.31 and 0.82 separated those, so 0.6
+# looked safe and told me nothing. Against questions that are campus-shaped but
+# uncovered (gym hours, music practice rooms, intramural sign-ups) the real
+# negative group starts at 0.435, and 0.6 let 5 of 10 of them through to the
+# model. The two groups that matter are:
+#
+#     in-scope, 5 questions:   0.173  0.200  0.206  0.276  0.306
+#     uncovered, 10 questions: 0.435  0.474  0.516  0.547  0.588  0.614 ...
+#
+# 0.37 is the midpoint of that gap. It refuses all 10 uncovered questions and
+# still accepts all 5 in-scope ones, but the margin is now ~0.065 on each side
+# rather than ~0.5, so a new in-scope question phrased unlike my five could be
+# refused. See README.md -> What's Still Broken.
+THRESHOLD = 0.37
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────

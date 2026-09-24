@@ -78,12 +78,32 @@ QUESTIONS = [
 # `run_eval.py` runs these through retrieval and the gate on every eval and
 # records what happened, so criterion 3 has evidence in the run log alongside
 # the others. They cost no model calls: a refusal never reaches the model.
+#
+# ── Replaced in unit 2 ───────────────────────────────────────────────────────
+# The original five were from a different world entirely:
+#
+#     "What is the capital of Mongolia?"
+#     "How do I change the oil in a diesel engine?"
+#     "Who won the 1994 World Cup?"
+#     "What is the recommended dosage of ibuprofen for a headache?"
+#     "How do I write a for loop in Rust?"
+#
+# Every one came back between 0.825 and 0.934 against a 0.6 cutoff, so not one
+# of them was within 0.2 of the line. They proved the gate refuses questions
+# about diesel engines, which was never in doubt.
+#
+# These five are campus-life-shaped and uncovered: the corpus has nothing on
+# gyms, music practice rooms, intramural sports, pharmacies or pets. They share
+# the vocabulary and register of the 88 posts, which is the case that actually
+# tests the gate. Chosen as a spread across the distance range BEFORE the
+# threshold was retuned — three of them defeated the old 0.6 cutoff and two did
+# not, so this set is not selected to flatter the fix.
 OUT_OF_SCOPE = [
-    "What is the capital of Mongolia?",
-    "How do I change the oil in a diesel engine?",
-    "Who won the 1994 World Cup?",
-    "What is the recommended dosage of ibuprofen for a headache?",
-    "How do I write a for loop in Rust?",
+    "How do I book a practice room in the music building?",     # 0.435 at TOP_K=4
+    "What are the gym's opening hours?",                        # 0.516
+    "When do intramural sports sign-ups happen?",               # 0.588
+    "Is there a campus pharmacy?",                              # 0.614
+    "What is the policy on keeping a pet in the dorms?",        # 0.657
 ]
 
 
